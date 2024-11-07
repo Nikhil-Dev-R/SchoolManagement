@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">My School</string>
+    <string name="image_content_description">"Image "</string>
+    <string name="school_desc_50">"Lifeline Public School is a leading institution providing " +
+                    "top-notch education and a variety of facilities " +
+                    "to help students excel in their academic and personal" +
+                    " lives."</string>
+    <string name="school_desc_200">
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Natus ipsum delectus repellendus suscipit eum quisquam obcaecati dolorum velit perferendis dolore doloremque itaque, ullam aliquid? Dolores deserunt perferendis, laborum rerum quidem velit blanditiis sed a totam debitis, reiciendis soluta! Dignissimos voluptates rerum quibusdam vero molestias temporibus provident nihil dolores architecto beatae cumque vitae pariatur tenetur non eveniet corrupti nemo reprehenderit consequuntur, harum aut explicabo iste. Quas atque exercitationem dolorum ea voluptate excepturi nulla? Amet praesentium expedita suscipit. Cum magni, fugit quod nemo excepturi eum quos nesciunt iusto minima hic adipisci possimus aperiam libero deserunt voluptatem explicabo blanditiis eligendi quisquam! Accusamus libero quibusdam expedita consectetur perferendis! Fugit mollitia voluptatum libero, nesciunt fugiat explicabo molestiae cumque ducimus laborum ut harum sint dolores nulla quisquam corporis dolorem soluta adipisci possimus eaque, officiis quod expedita. Rerum accusantium eum necessitatibus voluptatem, cumque delectus, magni quidem quaerat rem nemo beatae molestias? Similique obcaecati voluptates, consequuntur doloribus tempore, minus fuga ullam, magnam dolorum molestiae atque. Expedita sunt, qui veniam atque dolore ipsa ipsum ipsam. Tempora facere doloribus minima rerum odit natus, odio, eaque suscipit aliquam ducimus quae ab nulla tempore earum ad? Fugit aliquid consequuntur minima eveniet quis magnam excepturi ea, nam nesciunt soluta, cumque vitae ipsa perspiciatis.
+    </string>
+</resources>
