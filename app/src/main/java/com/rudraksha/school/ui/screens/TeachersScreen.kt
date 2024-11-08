@@ -1,8 +1,10 @@
 package com.rudraksha.school.ui.screens
 
 import android.util.Log
-import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.animation.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -12,10 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Save
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -25,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,25 +37,29 @@ import com.rudraksha.school.ui.components.SchoolFab
 import com.rudraksha.school.ui.components.SchoolIcon
 import com.rudraksha.school.ui.components.SchoolImage
 import com.rudraksha.school.ui.components.SchoolText
-import com.rudraksha.school.ui.theme.circleShapeMedium
-import com.rudraksha.school.ui.theme.roundedCornerShapeMedium
 import com.rudraksha.school.ui.utils.SchoolTopBar
 
 @Composable
-fun TeachersScreen(
+fun TeachersScreen2(
     teacherList: List<RoomTeacher>,
     modifier: Modifier = Modifier,
     onNavIconClick: () -> Unit = {},
     onCardClick: (String) -> Unit = {},
 ) {
     var isFabPressed by remember { mutableStateOf(false) }
-
+    var isNavClicked by remember {
+        mutableStateOf(false)
+    }
     Scaffold(
         topBar = {
             SchoolTopBar(
                 title = "Teachers",
                 modifier = modifier,
-                onNavIconClick = onNavIconClick,
+                navigationIcon = Icons.AutoMirrored.Outlined.ArrowBack,
+                onNavIconClick = {
+                    isNavClicked = true
+                    onNavIconClick()
+                },
             )
         },
         floatingActionButton = {
@@ -119,6 +123,84 @@ fun TeachersScreen(
         }
     }
 }
+
+@Composable
+fun TeachersScreen(
+    teacherList: List<RoomTeacher>,
+    modifier: Modifier = Modifier,
+    onNavIconClick: () -> Unit = {},
+    onCardClick: (String) -> Unit = {},
+) {
+    var isFabPressed by remember { mutableStateOf(false) }
+
+    Scaffold(
+        topBar = {
+            SchoolTopBar(
+                title = "Teachers",
+                modifier = Modifier,
+                onNavIconClick = onNavIconClick
+            )
+        },
+        floatingActionButton = {
+            SchoolFab(
+                onClick = {
+                    isFabPressed = !isFabPressed
+                }
+            ) {
+                if (isFabPressed) {
+                    SchoolIcon(
+                        imageVector = Icons.Outlined.Save,
+                        modifier = Modifier.size(32.dp),
+                    )
+                } else {
+                    SchoolIcon(
+                        imageVector = Icons.Outlined.Add,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = modifier
+                .padding(innerPadding)
+                .padding(start = 16.dp, end = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            items(teacherList.size) { index ->
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    SchoolCard(
+                        content = {
+                            SchoolImage(
+                                imageUrl = teacherList[index].imageUrl,
+                                contentScale = ContentScale.Crop
+                            )
+                        },
+                        onCardClick = {
+                            Log.d("Teacher Id", "Send ${teacherList[index].id}")
+                            onCardClick(teacherList[index].id)
+                        },
+                        width = 150.dp,
+                        height = 150.dp,
+                    )
+                    SchoolText(
+                        text = teacherList[index].name,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineMedium,
+                        modifier = Modifier.padding(4.dp),
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+    }
+}
+
 
 @Preview
 @Composable
@@ -202,3 +284,4 @@ fun TeachersScreenPreview() {
         teacherList = teacherList,
     )
 }
+

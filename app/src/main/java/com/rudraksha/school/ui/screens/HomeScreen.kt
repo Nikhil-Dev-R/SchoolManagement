@@ -5,11 +5,14 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -59,7 +62,6 @@ fun HomeScreen(
     email: String,
     signOut: () -> Unit,
     navController: NavController,
-    modifier: Modifier = Modifier,
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -73,18 +75,21 @@ fun HomeScreen(
                 enter = fadeIn() + slideInHorizontally(),
                 exit = slideOutHorizontally() + fadeOut(),
             ) {
-                DrawerContent(
-                    onCloseDrawer = {
-                        scope.launch {
-                            drawerState.close()
-                        }
-                    },
-                    modifier = Modifier,
-                    name = name,
-                    email = email,
-                    signOut = signOut,
-                    navController = navController
-                )
+                Column {
+                    Spacer(modifier = Modifier.height(48.dp))
+                    DrawerContent(
+                        onCloseDrawer = {
+                            scope.launch {
+                                drawerState.close()
+                            }
+                        },
+                        modifier = Modifier,
+                        name = name,
+                        email = email,
+                        signOut = signOut,
+                        navController = navController
+                    )
+                }
             }
         }
     ) {
@@ -119,11 +124,13 @@ fun HomeScreenContent(
 ) {
     val scrollState = rememberScrollState()
     Box(
-//        modifier = modifier,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = modifier,
+            modifier = Modifier,
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
@@ -142,14 +149,15 @@ fun HomeScreenContent(
 
         Column(
             modifier = modifier
-                .verticalScroll(scrollState),
+                .verticalScroll(scrollState)
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
         ) {
             // School Image
             SchoolCard(
                 modifier = Modifier
-                    .wrapContentSize()
+                    .fillMaxWidth()
                     .aspectRatio(16 / 9f)
                     .align(Alignment.CenterHorizontally)
                     .shadow(
@@ -161,7 +169,7 @@ fun HomeScreenContent(
                         imageUrl = "https://images.squarespace-cdn.com/content/v1/5e9737180d92ba206d5b0777/1588962068093-2GT81W9M1TPARNP4F39G/CMS+Campus.jpg",
                         contentDescription = "College Image",
                         modifier = Modifier
-                            .wrapContentSize(),
+                            .fillMaxWidth(),
                     )
                 }
             )
@@ -170,7 +178,7 @@ fun HomeScreenContent(
 
             // School Details
             SchoolText(
-                text = "Welcome to Nature Loving School",
+                text = "Welcome to International School of Excellence",
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
@@ -188,7 +196,7 @@ fun HomeScreenContent(
             Spacer(modifier = Modifier.height(32.dp))
 
             SchoolText(
-                text = "Created by Rudraksha",
+                text = "Creator: Rudraksha",
                 fontFamily = FontFamily.Cursive,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )

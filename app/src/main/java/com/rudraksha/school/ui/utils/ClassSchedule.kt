@@ -7,7 +7,6 @@ import androidx.navigation.NavController
 
 @Composable
 fun ClassSchedule(
-    navController: NavController = NavController(LocalContext.current),
 ) {
 
 }

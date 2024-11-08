@@ -6,6 +6,38 @@ import com.rudraksha.school.models.firebase.FirebaseSubject
 import com.rudraksha.school.models.firebase.FirebaseTeacher
 
 class LocalDataRepository {
+    val quotes: List<String> = listOf(
+        "Believe in yourself, achieve greatness.",
+        "Learning is the key to unlocking your potential.",
+        "Success is not final, failure is not fatal: It is the courage to continue.",
+        "Don't watch the clock, do what it does. Keep going.",
+        "You don't have to be great to start, but you have to start to be great.",
+
+        "Knowledge is power.",
+        "Education is the most powerful weapon.",
+        "Learning is not attained by chance, it must be sought for.",
+        "The root of education is bitter, but the fruit is sweet.",
+        "Education transforms, inspires, and empowers.",
+
+        "Empowering young minds to shape a brighter tomorrow.",
+        "Discover, Explore, Learn: The Journey Begins Here.",
+        "Unlocking the genius within every student.",
+        "Where curiosity meets discovery, and dreams take flight.",
+        "Learn with passion, grow with purpose.",
+
+        "Learn, Grow, Achieve.",
+        "Empower, Inspire, Educate.",
+        "Shape Your Future.",
+        "Unlock Your Potential.",
+        "Dream Big.",
+
+        "The best way to predict your future is to create it.\n\t\t Abraham Lincoln",
+        "Education is not preparation for life; education is life itself.\n\t\t - John Dewey",
+        "The whole purpose of education is to turn mirrors into windows.\n\t\t - Sydney J. Harris",
+        "Learning is not a spectator sport.\n\t\t - D. Blocher",
+        "The highest result of education is tolerance.\n\t\t - Helen Keller",
+    )
+
     val studentList = mutableListOf<FirebaseStudent>().apply {
         // Nursery to Grade U.K.G. (Basic subjects)
         addAll(generateNurseryToGradeUkgStudents("Nursery"))
@@ -224,7 +256,7 @@ class LocalDataRepository {
                 rollNumber = String.format("%03d", i + 1),
                 name = "Student${i + 1}",
                 standard = gradeLevel,  // Nursery 1, 2, or 3
-                section = if( (0..1).random() == 0 ) "A" else "B",
+                section = if ((0..1).random() == 0) "A" else "B",
                 presentDays = (0..25).random(),
                 subjectMarks = listOf(
                     FirebaseSubject("H", "Hindi", (70..100).random()),
@@ -242,7 +274,7 @@ class LocalDataRepository {
                 rollNumber = String.format("%03d", i + 1),
                 name = "Student${i + 1}",
                 standard = gradeLevel,
-                section = if((0..1).random() == 0) "A" else "B",
+                section = if ((0..1).random() == 0) "A" else "B",
                 presentDays = (0..25).random(),
                 subjectMarks = listOf(
                     FirebaseSubject("H", "Hindi", (70..100).random()),
@@ -261,7 +293,7 @@ class LocalDataRepository {
                 rollNumber = String.format("%03d", i + 1),
                 name = "Student${i + 1}",
                 standard = gradeLevel,
-                section = if((0..1).random() == 0) "A" else "B",
+                section = if ((0..1).random() == 0) "A" else "B",
                 presentDays = (0..25).random(),
                 subjectMarks = listOf(
                     FirebaseSubject("H", "Hindi", (70..100).random()),
@@ -282,7 +314,7 @@ class LocalDataRepository {
                 rollNumber = String.format("%03d", i + 1),
                 name = "Student${i + 1}",
                 standard = gradeLevel,
-                section = if((0..1).random() == 0) "A" else "B",
+                section = if ((0..1).random() == 0) "A" else "B",
                 presentDays = (0..25).random(),
                 subjectMarks = listOf(
                     FirebaseSubject("H", "Hindi", (50..100).random()),

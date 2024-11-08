@@ -48,13 +48,11 @@ fun ClassDescScreen(
             verticalArrangement = Arrangement.Center,
             modifier = modifier
                 .padding(innerPadding)
-                .padding(16.dp),
         ) {
             items(1) {
                 SchoolText(
                     text = "Class Description",
-                    fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-                    fontWeight = MaterialTheme.typography.headlineLarge.fontWeight
+                    style = MaterialTheme.typography.headlineLarge
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
@@ -67,10 +65,18 @@ fun ClassDescScreen(
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleLarge
                     )
-                    SchoolText(
-                        text = classTeacher,
-                        style = MaterialTheme.typography.titleLarge
-                    )
+                    if(classTeacher == "Unavailable") {
+                        SchoolText(
+                            text = "Unavailable",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    } else {
+                        SchoolText(
+                            text = classTeacher,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -85,25 +91,35 @@ fun ClassDescScreen(
                         style = MaterialTheme.typography.titleLarge
                     )
                     Column {
-                        subjectList.forEach { subject ->
+                        if(subjectList.isEmpty()) {
                             SchoolText(
-                                text = subject.name,
-                                style = MaterialTheme.typography.bodyLarge
+                                text = "Unavailable",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.error
                             )
+                        } else {
+                            subjectList.forEach { subject ->
+                                SchoolText(
+                                    text = subject.name,
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                            }
                         }
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
 
-                SchoolButton(
-                    content = {
-                        SchoolText(
-                            text = "Attendance",
-                            style = MaterialTheme.typography.headlineMedium,
-                        )
-                    },
-                    onClick = { onAttendanceClick(standard) }
-                )
+                if(studentList.isNotEmpty()) {
+                    SchoolButton(
+                        content = {
+                            SchoolText(
+                                text = "Attendance",
+                                style = MaterialTheme.typography.headlineMedium,
+                            )
+                        },
+                        onClick = { onAttendanceClick(standard) }
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -116,7 +132,8 @@ fun ClassDescScreen(
                     ) {
                         SchoolText(
                             text = "No students found!",
-                            style = MaterialTheme.typography.titleLarge
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.error
                         )
                     }
                 } else {

@@ -3,15 +3,11 @@ package com.rudraksha.school.navigation
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -53,10 +49,28 @@ fun AppNavHost(
 //        schoolViewModel.eraseAllData()
         if(schoolViewModel.getCurrentUser() != null)
             schoolViewModel.loadInitialData()
-        schoolViewModel.fetchStudents()
-        schoolViewModel.fetchTeachers()
-        schoolViewModel.fetchGalleryItems()
     }
+
+    LaunchedEffect (uiState.anyMessage) {
+        // Show an error message
+        if(uiState.toastMessage.isNotEmpty()) {
+            Toast.makeText(context, uiState.toastMessage, Toast.LENGTH_SHORT).show()
+            schoolViewModel.reset()
+        }
+    }
+
+    // Handle UI States
+//    LaunchedEffect (uiState.isLoading) { // Show a loading spinner or overlay
+//        if (uiState.isLoading) {
+//            Column(
+//                horizontalAlignment = Alignment.CenterHorizontally,
+//                verticalArrangement = Arrangement.Center,
+//                modifier = Modifier.fillMaxSize()
+//            ) {
+//                CircularProgressIndicator(modifier = Modifier)
+//            }
+//        }
+//    }
 
     NavHost(
         navController = navController,
@@ -64,12 +78,15 @@ fun AppNavHost(
         modifier = modifier
     ) {
         composable(Screen.Splash.route) {
+            var quote = schoolViewModel.getQuote()
+            SideEffect {
+                quote = schoolViewModel.getQuote()
+            }
             SplashScreen(
+                quote = quote,
                 navigateTo = {
                     if(schoolViewModel.isLoggedIn()) {
-                        navController.navigate(
-                            route = Screen.Home.route
-                        ) {
+                        navController.navigate(Screen.Home.route) {
                             popUpTo(Screen.Splash.route) {
                                 inclusive = true
                             }
@@ -91,26 +108,21 @@ fun AppNavHost(
             LoginScreen(
                 onLoginClick = { email, password ->
                     validateLoginInput(uiState, email, password)
-                    if (uiState.errorMessage != "") {
-                        Toast.makeText(context, uiState.errorMessage, Toast.LENGTH_SHORT).show()
-                    } else {
-                        schoolViewModel.login(
-                            email = email,
-                            password = password
-                        ) { success ->
-                            if (success) {
-                                navController.navigate(Screen.Home.route) {
-                                    popUpTo(Screen.Splash.route) { inclusive = true }
-                                }
-                                Log.d("Login", "Success")
-//                                Toast.makeText(context, "Login Successful!", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Log.d("Login", "Failure ${uiState.errorMessage}")
-//                                Toast.makeText(context, "Login Failed! ${uiState.errorMessage}", Toast.LENGTH_SHORT).show()
+                    schoolViewModel.login(
+                        email = email,
+                        password = password
+                    ) { success ->
+                        if (success) {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(Screen.Splash.route) { inclusive = true }
                             }
+                            Log.d("Login", "Success")
+                            uiState.toastMessage = "Login Successful!"
+                        } else {
+                            Log.d("Login", "Failure ${uiState.toastMessage}")
+                            uiState.toastMessage = "Login Failed! ${uiState.toastMessage}"
                         }
                     }
-                    schoolViewModel.reset()
                 },
                 modifier = modifier
             )
@@ -120,8 +132,8 @@ fun AppNavHost(
             RegisterScreen(
                 onRegisterClick = { name, email, password, confirmPassword ->
                     validateRegistrationInput(uiState, name, email, password, confirmPassword)
-                    if (uiState.errorMessage != "") {
-                        Toast.makeText(context, uiState.errorMessage, Toast.LENGTH_SHORT).show()
+                    if (uiState.toastMessage != "") {
+                        Toast.makeText(context, uiState.toastMessage, Toast.LENGTH_SHORT).show()
                     } else {
                         schoolViewModel.register(
                             email = email,
@@ -129,13 +141,9 @@ fun AppNavHost(
                         ) { success ->
                             if (success) {
                                 navController.navigateUp()
-//                                (Screen.Home.route) {
-//                                    popUpTo(Screen.Home.route) { inclusive = true }
-//                                }
-                                Toast.makeText(context, "Registration Successful!", Toast.LENGTH_SHORT).show()
+                                uiState.toastMessage = "Registration Successful!"
                             } else {
-                                Toast.makeText(context, "Registration Failed! ${uiState.errorMessage}",
-                                    Toast.LENGTH_SHORT).show()
+                                uiState.toastMessage = "Registration Failed! ${uiState.toastMessage}"
                             }
                         }
                     }
@@ -145,22 +153,15 @@ fun AppNavHost(
             )
         }
 
-        composable(
-            route = Screen.Home.route,
-        ) {
+        composable(Screen.Home.route) {
             val currentUser = schoolViewModel.getCurrentUser()
             HomeScreen(
                 name = currentUser?.displayName ?: "User",
                 email = currentUser?.email ?: "Email",
-                modifier = modifier,
                 signOut = { schoolViewModel.signOut() },
                 navController = navController
             )
         }
-
-        /*composable(route = Screen.Admission.route) {
-            Adm
-        }*/
 
         composable(Screen.Classes.route) {
             ClassesScreen(
@@ -169,7 +170,6 @@ fun AppNavHost(
                     navController.navigateUp()
                 },
                 onCardClick = { standard ->
-                    schoolViewModel.fetchStudentsByStandard(standard = standard)
                     navController.navigate("${Screen.ClassDesc.route}/$standard")
                 },
                 modifier = modifier
@@ -180,7 +180,15 @@ fun AppNavHost(
             route = "${Screen.ClassDesc.route}/{standard}",
             arguments = listOf(navArgument("standard") { type = NavType.StringType })
         ) { backStackEntry ->
-            val standard = backStackEntry.arguments?.getString("standard") ?: standardList[0]
+            val standard = backStackEntry.arguments?.getString("standard") ?: ""
+            // Fetch students for the selected standard when the screen is displayed
+            LaunchedEffect(standard) {
+                if(uiState.studentList[0].standard != standard) {
+                    schoolViewModel.fetchStudentsByStandard(standard = standard)
+                    schoolViewModel.fetchTeachers()
+                }
+            }
+
             val studentList = uiState.studentList.distinct().filter { it.standard == standard }.sortedBy { it.rollNumber }
             val subjectList = studentList.firstOrNull()?.subjectMarks?.sortedBy { it.id } ?: emptyList()
             val classTeacher = uiState.teacherList.distinct().find { it.standard == standard }?.name ?: "Unavailable"
@@ -196,9 +204,9 @@ fun AppNavHost(
                 onStudentClick = { id ->
                     navController.navigate("${Screen.StudentProfile.route}/${id}")
                 },
-                onAttendanceClick = { standard ->
-                    Log.d("Navigation", "Navigating to Attendance Screen with grade level: $standard")
-                    navController.navigate("${Screen.Attendance.route}/$standard")
+                onAttendanceClick = { std ->
+                    Log.d("Navigation", "Navigating to Attendance Screen with grade level: $std")
+                    navController.navigate("${Screen.Attendance.route}/$std")
                 },
                 modifier = modifier
             )
@@ -232,8 +240,17 @@ fun AppNavHost(
             route = "${Screen.Attendance.route}/{standard}",
             arguments = listOf(navArgument("standard") { type = NavType.StringType }),
         ) { backStackEntry ->
-            val gradeLevel = backStackEntry.arguments?.getString("standard") ?: standardList[0]
-            val studentList = uiState.studentList.distinct().filter { it.standard == gradeLevel }.sortedBy { it.rollNumber }
+            val standard = backStackEntry.arguments?.getString("standard") ?: ""
+
+            // Fetch students for the selected standard when navigating to Attendance screen
+            LaunchedEffect(standard) {
+                if(uiState.studentList[0].standard != standard) {
+                    schoolViewModel.fetchStudentsByStandard(standard)
+                    schoolViewModel.fetchTeachers()
+                }
+            }
+
+            val studentList = uiState.studentList.distinct().filter { it.standard == standard }.sortedBy { it.rollNumber }
 
             AttendanceScreen(
                 studentList = studentList,
@@ -241,7 +258,7 @@ fun AppNavHost(
                     navController.navigateUp()
                 },
                 onSubmitClick = { attendanceMap ->
-                    schoolViewModel.updateAttendance(gradeLevel, attendanceMap)
+                    schoolViewModel.updateAttendance(standard, attendanceMap)
                     Log.d("Attendance", "Submitted Attendance: ${attendanceMap.size}")
                     navController.navigateUp()
                 },
@@ -275,6 +292,10 @@ fun AppNavHost(
 
         composable(Screen.Teachers.route) {
 //            Log.d("Teacher Size", "Teachers Route: ${uiState.teacherList.size}")
+            LaunchedEffect(Unit) {
+                schoolViewModel.fetchTeachers()
+            }
+
             TeachersScreen(
                 teacherList = uiState.teacherList,
                 onNavIconClick = {
@@ -312,6 +333,10 @@ fun AppNavHost(
         }
 
         composable(Screen.Gallery.route) {
+            LaunchedEffect(Unit) {
+                schoolViewModel.fetchGalleryItems()
+            }
+
             GalleryScreen(
                 galleryItems = uiState.galleryList,
                 onNavIconClick = { navController.navigateUp() },
@@ -336,22 +361,5 @@ fun AppNavHost(
                 )
             }
         }
-    }
-
-    // Handle UI States
-    if (uiState.isLoading) {
-        // Show a loading spinner or overlay
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            CircularProgressIndicator(modifier = Modifier)
-        }
-    }
-
-    if (uiState.isError) {
-        // Show an error message
-        Toast.makeText(context, "An error occurred. Please try again.", Toast.LENGTH_SHORT).show()
     }
 }

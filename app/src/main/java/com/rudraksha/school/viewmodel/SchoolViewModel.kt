@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.random.Random
 
 class SchoolViewModel(
     private val firebaseAuthRepo: FirebaseAuthRepository,
@@ -47,6 +48,16 @@ class SchoolViewModel(
 
     private val localDataRepository = LocalDataRepository()
 
+    fun getQuote(): String {
+        try {
+            val rand = Random.nextInt(localDataRepository.quotes.size)
+//            val rand = ThreadLocalRandom.current().nextInt(localDataRepository.quotes.size)
+            return localDataRepository.quotes[rand]
+        } catch (e: IndexOutOfBoundsException) {
+            return "Education is the foundation of a country's prosperity."
+        }
+    }
+
     private val _uiState = MutableStateFlow(SchoolUiState())
     val uiState: StateFlow<SchoolUiState> = _uiState
 
@@ -55,9 +66,9 @@ class SchoolViewModel(
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 setLoading()
-                /*localDataRepository.studentList.forEach { student ->
+                localDataRepository.studentList.forEach { student ->
                     saveStudent(student)
-                }*/
+                }
                 localDataRepository.teacherList.forEach { teacher ->
                     saveTeacher(teacher)
                 }
@@ -75,6 +86,7 @@ class SchoolViewModel(
                 setLoading()
                 teacherDao.getAllTeachers().forEach { teacher ->
                     loadTeacher(teacher)
+                    Log.d("Fetched", "Loaded Teacher ${teacher.name} ${teacher.id}")
                 }
                 reset()
             }
@@ -86,7 +98,7 @@ class SchoolViewModel(
                 setLoading()
                 studentDao.getAllStudents().forEach { student ->
                     loadStudent(student)
-                    Log.d("Student", "Loaded ${student.name} ${student.standard}")
+                    Log.d("Fetched", "Loaded Student ${student.name} ${student.standard}")
                 }
                 reset()
             }
@@ -100,7 +112,7 @@ class SchoolViewModel(
                 _uiState.value = _uiState.value.copy(studentList = mutableListOf())
                 studentDao.getAllStudentsByStandard(standard).forEach { student ->
                     loadStudent(student)
-                    Log.d("StudentStandard", "Loaded ${student.name} ${student.standard}")
+                    Log.d("Fetched", "Loaded StudentStandard ${student.name} ${student.standard}")
                 }
                 reset()
             }
@@ -112,7 +124,7 @@ class SchoolViewModel(
                 setLoading()
                 galleryDao.getAllGalleryItems().forEach { galleryItem ->
                     loadGalleryItem(galleryItem)
-                    Log.d("Gallery", "Loaded ${galleryItem.name}")
+                    Log.d("Fetched", "Loaded Gallery ${galleryItem.name}")
                 }
                 reset()
             }
@@ -307,8 +319,8 @@ class SchoolViewModel(
     fun reset() {
         _uiState.value = _uiState.value.copy(
             isLoading = false,
-            isError = false,
-            errorMessage = "",
+            anyMessage = false,
+            toastMessage = "",
         )
     }
 
@@ -317,13 +329,12 @@ class SchoolViewModel(
     }
 
     private fun setError(errorMsg: String) {
-        _uiState.value = _uiState.value.copy(isError = true, errorMessage = errorMsg)
+        _uiState.value = _uiState.value.copy(anyMessage = true, toastMessage = errorMsg)
         // Log the error if needed for debugging: Log.e("SchoolViewModel", errorMsg)
     }
 
     fun updateAttendance(standard: String, attendanceMap: Map<String, Boolean>) {
-        /*viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(studentList = studentDao.getAllStudentsByStandard(standard).toMutableList())
+        viewModelScope.launch {
             _uiState.value.studentList.forEach { student ->
                 saveStudent(
                     student.copy(
@@ -331,7 +342,11 @@ class SchoolViewModel(
                     ).toFirebaseStudent()
                 )
             }
-        }*/
+            _uiState.value = _uiState.value.copy(
+                anyMessage = true,
+                toastMessage = "Attendance updated"
+            )
+        }
     }
 
     companion object {
@@ -352,8 +367,8 @@ class SchoolViewModel(
 
 data class SchoolUiState(
     val isLoading: Boolean = false,
-    val isError: Boolean = false,
-    var errorMessage: String = "",
+    val anyMessage: Boolean = false,
+    var toastMessage: String = "",
     val isLoggedIn: Boolean = false,
     val loggedInUser: RoomAppUser? = null,
     var studentList: MutableList<RoomStudent> = mutableListOf(),

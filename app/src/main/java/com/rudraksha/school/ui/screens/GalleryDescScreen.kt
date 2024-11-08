@@ -1,6 +1,7 @@
 package com.rudraksha.school.ui.screens
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -8,6 +9,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,15 +36,23 @@ fun GalleryDescScreen(
     ) { innerPadding ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = modifier.padding(innerPadding).padding(16.dp),
+            modifier = modifier
+                .padding(innerPadding),
         ) {
             SchoolCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(16 / 9f)
+                    .align(Alignment.CenterHorizontally)
+                    .shadow(
+                        elevation = 4.dp,
+                        shape = circleShapeMedium
+                    ),
                 content = {
                     SchoolImage(
                         imageUrl = galleryItem.imageUrl,
                     )
                 },
-                modifier = Modifier.fillMaxWidth(),
                 shape = circleShapeMedium,
             )
             SchoolText(

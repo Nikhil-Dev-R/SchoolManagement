@@ -41,13 +41,15 @@ fun AttendanceScreen(
         topBar = {
             SchoolTopBar(
                 title = "Attendance",
-                onNavIconClick = onNavIconClick)
+                onNavIconClick = onNavIconClick
+            )
         },
         bottomBar = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Bottom,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 48.dp)
                     .zIndex(1f)
             ) {
@@ -63,62 +65,47 @@ fun AttendanceScreen(
             }
         }
     ) { innerPadding ->
-        if(studentList.isEmpty()) {
-            Column(
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top
+        ) {
+            LazyColumn(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
-                modifier = modifier
+                modifier = Modifier
                     .padding(innerPadding)
+                    .wrapContentHeight()
             ) {
-                SchoolText(
-                    text = "No students found!",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-        } else {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
-            ) {
-                LazyColumn(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .wrapContentHeight()
-                ) {
-                    items(1) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 16.dp, end = 16.dp),
-                        ) {
-                            SchoolText(
-                                text = "Roll No",
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            SchoolText(
-                                text = "Student Name",
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
-                            SchoolText(
-                                text = "Present",
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
-                        }
-                    }
-                    items(studentList.size) {
-                        StudentAttendanceItem(
-                            attendanceMap = attendanceMap,
-                            id = studentList[it].id,
-                            rollNo = studentList[it].rollNumber,
-                            name = studentList[it].name,
+                items(1) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp),
+                    ) {
+                        SchoolText(
+                            text = "Roll No",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        SchoolText(
+                            text = "Student Name",
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        SchoolText(
+                            text = "Present",
+                            style = MaterialTheme.typography.bodyLarge,
                         )
                     }
+                }
+                items(studentList.size) {
+                    StudentAttendanceItem(
+                        attendanceMap = attendanceMap,
+                        id = studentList[it].id,
+                        rollNo = studentList[it].rollNumber,
+                        name = studentList[it].name,
+                    )
                 }
             }
         }
@@ -195,10 +182,10 @@ fun AttendanceScreenPreview() {
                         marks = 90
                     ),
 
-                )
+                    )
             ),
 
-        ),
+            ),
         onNavIconClick = {},
         onSubmitClick = {},
     )
