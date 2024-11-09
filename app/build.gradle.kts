@@ -62,9 +62,9 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation("androidx.compose.material:material-icons-extended:1.4.0")
+    implementation(libs.androidx.material.icons.extended)
 
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation(libs.coil.compose)
 
     implementation(libs.firebase.database)
     implementation(libs.firebase.auth)
@@ -73,11 +73,11 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
 
-    implementation("androidx.room:room-runtime:2.6.1") // Use the latest version
+    implementation(libs.androidx.room.runtime)
     kapt("androidx.room:room-compiler:2.6.1") // Use kapt for annotation processing
-    implementation("androidx.room:room-ktx:2.6.1")
+    implementation(libs.androidx.room.ktx)
 
-    implementation("com.google.code.gson:gson:2.8.9") // You can use the latest version available
+    implementation(libs.gson) // You can use the latest version available
 
     implementation(libs.androidx.animation.core)
 

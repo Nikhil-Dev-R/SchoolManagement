@@ -67,7 +67,7 @@ fun SchoolFab(
         modifier = modifier
             .size(size)
             .border(width = 4.dp, color = Color.White, shape = shape),
-        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
         contentColor = contentColor,
         onClick = onClick,
         elevation = elevation,

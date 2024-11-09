@@ -3,10 +3,10 @@ package com.rudraksha.school.models.firebase
 import com.rudraksha.school.models.room.RoomTeacher
 
 data class FirebaseTeacher(
-    val id: String,
-    val name: String,
-    val imageUrl: String,
-    val description: String,
+    val id: String = "",
+    val name: String = "",
+    val imageUrl: String = "",
+    val description: String = "",
     val isClassTeacher: Boolean = false,
     val standard: String = ""
 )

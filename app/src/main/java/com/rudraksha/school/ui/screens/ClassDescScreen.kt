@@ -1,6 +1,5 @@
 package com.rudraksha.school.ui.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -28,12 +27,12 @@ import com.rudraksha.school.ui.utils.SchoolTopBar
 fun ClassDescScreen(
     standard: String,
     classTeacher: String,
-    studentList: List<RoomStudent>,
     subjectList: List<RoomSubject>,
     modifier: Modifier = Modifier,
+    isStudentListEmpty: Boolean = false,
     onNavIconClick: () -> Unit = {},
     onAttendanceClick: (String) -> Unit = {},
-    onStudentClick: (String) -> Unit = {},
+    onStudentsClick: (String) -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -43,73 +42,107 @@ fun ClassDescScreen(
             )
         }
     ) { innerPadding ->
-        LazyColumn (
+        Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = modifier
                 .padding(innerPadding)
         ) {
-            items(1) {
+            SchoolText(
+                text = "Class Description",
+                style = MaterialTheme.typography.headlineLarge
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 SchoolText(
-                    text = "Class Description",
-                    style = MaterialTheme.typography.headlineLarge
+                    text = "Class Teacher",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
+                SchoolText(
+                    text = classTeacher,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = if (classTeacher == "Unavailable") MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+            // Subjects
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                SchoolText(
+                    text = "Subjects:",
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .weight(1f)
+                )
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .weight(1f)
                 ) {
-                    SchoolText(
-                        text = "Class Teacher",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    if(classTeacher == "Unavailable") {
+                    if (subjectList.isEmpty()) {
                         SchoolText(
                             text = "Unavailable",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.error
                         )
                     } else {
-                        SchoolText(
-                            text = classTeacher,
-                            style = MaterialTheme.typography.titleLarge
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-                // Subjects
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    SchoolText(text = "Subjects:",
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Column {
-                        if(subjectList.isEmpty()) {
-                            SchoolText(
-                                text = "Unavailable",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        } else {
-                            subjectList.forEach { subject ->
-                                SchoolText(
-                                    text = subject.name,
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
+                        subjectList.chunked(2).forEach { rowSubjects -> // Divide into rows of 2
+                            Row( // Use Row for horizontal alignment
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                rowSubjects.forEach { subject ->
+                                    SchoolText(
+                                        text = subject.name,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        modifier = Modifier.weight(1f) // Equal width for subjects
+                                    )
+                                }
+                                // Add a spacer if only one subject in the row
+                                if (rowSubjects.size == 1) {
+                                    Spacer(modifier =Modifier.weight(1f))
+                                }
                             }
                         }
                     }
                 }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (isStudentListEmpty) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    SchoolText(
+                        text = "No students found!",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
                 Spacer(modifier = Modifier.height(16.dp))
 
-                if(studentList.isNotEmpty()) {
+            } else {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     SchoolButton(
                         content = {
                             SchoolText(
@@ -117,100 +150,27 @@ fun ClassDescScreen(
                                 style = MaterialTheme.typography.headlineMedium,
                             )
                         },
-                        onClick = { onAttendanceClick(standard) }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                if(studentList.isEmpty()) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
+                        onClick = { onAttendanceClick(standard) },
                         modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-                        SchoolText(
-                            text = "No students found!",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                } else {
-                    SchoolText(
-                        text = "Students",
-                        style = MaterialTheme.typography.headlineMedium,
+                            .weight(1f)
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = modifier
-                            .fillMaxWidth(),
-                    ) {
-                        SchoolText(
-                            text = "Adm. ID",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                        )
-
-                        SchoolText(
-                            text = "Roll No",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                        )
-
-                        SchoolText(
-                            text = "Name",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                        )
-                    }
+                    SchoolButton(
+                        content = {
+                            SchoolText(
+                                text = "Students",
+                                style = MaterialTheme.typography.headlineMedium,
+                            )
+                        },
+                        onClick = { onStudentsClick(standard) },
+                        modifier = Modifier
+                            .weight(1f)
+                    )
                 }
-            }
-
-            items(studentList.size) { index ->
-                StudentItem(
-                    student = studentList[index],
-                    modifier = modifier,
-                    onStudentClick = onStudentClick,
-                )
             }
         }
-    }
-}
-
-@Composable
-fun StudentItem(
-    student: RoomStudent,
-    modifier: Modifier = Modifier,
-    onStudentClick: (String) -> Unit = {},
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(
-                onClick = { onStudentClick(student.id) }
-            ),
-    ) {
-        SchoolText(
-            text = student.id,
-            style = MaterialTheme.typography.bodyLarge,
-        )
-
-        SchoolText(
-            text = student.rollNumber,
-            style = MaterialTheme.typography.bodyLarge,
-        )
-
-        SchoolText(
-            text = student.name,
-            style = MaterialTheme.typography.bodyLarge
-        )
     }
 }
 
@@ -252,7 +212,6 @@ fun ClassDescScreenPreview() {
     ClassDescScreen(
         "5th",
         "Elena",
-        listOf(),
         listOf()
     )
 }

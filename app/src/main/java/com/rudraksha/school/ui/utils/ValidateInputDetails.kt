@@ -1,6 +1,7 @@
 package com.rudraksha.school.ui.utils
 
 import com.rudraksha.school.viewmodel.SchoolUiState
+import kotlinx.coroutines.flow.StateFlow
 
 fun validateRegistrationInput(
     uiState: SchoolUiState,
@@ -74,3 +75,38 @@ fun validateLoginInput(
     }
     uiState.toastMessage = ""
 }
+
+fun validateTeacherDetailsInput(
+    id: String, name: String,
+    imageUrl: String,
+    isClassTeacher: Boolean,
+    gradeLevel: String,
+    description: String,
+    uiState: SchoolUiState
+) {
+    if (id.isBlank()) {
+        uiState.anyMessage = true
+        uiState.toastMessage = "ID cannot be empty"
+    }
+
+    if (name.isBlank()) {
+        uiState.anyMessage = true
+        uiState.toastMessage = "Name cannot be empty"
+    }
+
+    if (isClassTeacher && gradeLevel.isBlank()) {
+        uiState.anyMessage = true
+        uiState.toastMessage = "Grade level is required for class teachers"
+    }
+}
+
+//fun validateStudentDetailsInput(
+//    id: String,
+//    name: String,
+//    imageUrl: String,
+//    gradeLevel: String,
+//    description: String,
+//    uiState: UiStateAddStudent = UiStateAddStudent()
+//) {
+//
+//}

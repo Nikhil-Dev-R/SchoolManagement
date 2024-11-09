@@ -56,7 +56,12 @@ fun SchoolCard(
         modifier = modifier
             .padding(8.dp)
             .size(width = width, height = height)
-            .shadow(elevation = 12.dp, shape = shape, clip = false) // Apply a custom shadow
+//            .shadow(
+//                elevation = 8.dp,
+//                shape = circleShapeMedium,
+//                spotColor = MaterialTheme.colorScheme.onPrimaryContainer,
+//                clip = false,
+//            )
             .clickable {
                 if (onCardClick != null) {
                     onCardClick()
