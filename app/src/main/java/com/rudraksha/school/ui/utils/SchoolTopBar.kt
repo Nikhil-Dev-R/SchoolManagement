@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,6 +26,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.rudraksha.school.ui.components.SchoolIcon
 import com.rudraksha.school.ui.components.SchoolText
 
@@ -33,14 +35,13 @@ import com.rudraksha.school.ui.components.SchoolText
 fun SchoolTopBar(
     onNavIconClick: () -> Unit,
     modifier: Modifier = Modifier,
+    rotation: Float = 180f,
     title: String = "School Name",
     navigationIcon: ImageVector = Icons.AutoMirrored.Outlined.ArrowBack,
 ) {
-    var isNavClicked by remember {
-        mutableStateOf(false)
-    }
-    val rotate = animateFloatAsState(
-        targetValue = if (isNavClicked) 180f else 0f,
+    var isClicked by remember { mutableStateOf(false) }
+    val animatedRotate = animateFloatAsState(
+        targetValue = if (isClicked) rotation else 0f,
         animationSpec = tween(
             durationMillis = 500,
             easing = LinearEasing
@@ -68,15 +69,15 @@ fun SchoolTopBar(
         navigationIcon = {
             IconButton(
                 onClick = {
-                    isNavClicked = !isNavClicked
+                    isClicked = !isClicked
                     onNavIconClick()
                 }
             ) {
                 SchoolIcon(
                     imageVector = navigationIcon,
                     contentDescription = "Menu",
-                    modifier = Modifier
-                        .rotate(rotate.value),
+                    size = 32.dp,
+                    modifier = Modifier.rotate(animatedRotate.value)
                 )
             }
         },

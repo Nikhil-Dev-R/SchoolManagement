@@ -3,13 +3,13 @@ package com.rudraksha.school.models.firebase
 import com.rudraksha.school.models.room.RoomStudent
 
 data class FirebaseStudent(
-    val id: String,
-    val rollNumber: String,
-    val name: String,
-    val standard: String,
-    val section: String,
-    val presentDays: Int,
-    val subjectMarks: List<FirebaseSubject>
+    val id: String = "",
+    val rollNumber: String = "",
+    val name: String = "",
+    val standard: String = "",
+    val section: String = "",
+    val presentDays: Int = 0,
+    val subjectMarks: List<FirebaseSubject> = listOf()
 )
 
 fun FirebaseStudent.toRoomStudent(): RoomStudent {

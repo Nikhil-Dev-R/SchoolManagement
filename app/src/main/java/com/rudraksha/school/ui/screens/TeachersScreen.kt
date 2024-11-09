@@ -40,99 +40,13 @@ import com.rudraksha.school.ui.components.SchoolText
 import com.rudraksha.school.ui.utils.SchoolTopBar
 
 @Composable
-fun TeachersScreen2(
-    teacherList: List<RoomTeacher>,
-    modifier: Modifier = Modifier,
-    onNavIconClick: () -> Unit = {},
-    onCardClick: (String) -> Unit = {},
-) {
-    var isFabPressed by remember { mutableStateOf(false) }
-    var isNavClicked by remember {
-        mutableStateOf(false)
-    }
-    Scaffold(
-        topBar = {
-            SchoolTopBar(
-                title = "Teachers",
-                modifier = modifier,
-                navigationIcon = Icons.AutoMirrored.Outlined.ArrowBack,
-                onNavIconClick = {
-                    isNavClicked = true
-                    onNavIconClick()
-                },
-            )
-        },
-        floatingActionButton = {
-            SchoolFab(
-                onClick = {
-                    isFabPressed = !isFabPressed
-                    if (isFabPressed) {
-                    }
-                }
-            ) {
-                if (isFabPressed) {
-                    SchoolIcon(
-                        imageVector = Icons.Outlined.Save,
-                        modifier = Modifier.size(32.dp),
-                    )
-                } else {
-                    SchoolIcon(
-                        imageVector = Icons.Outlined.Add,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-            }
-        },
-    ) { innerPadding ->
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = modifier
-                .padding(innerPadding)
-                .padding(start = 16.dp, end = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            items(teacherList.size) { index ->
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    SchoolCard(
-                        content = {
-                            SchoolImage(
-                                imageUrl = teacherList[index].imageUrl,
-                                contentScale = ContentScale.Crop
-                            )
-                        },
-                        onCardClick = {
-                            Log.d("Teacher Id", "Send ${teacherList[index].id}")
-                            onCardClick(teacherList[index].id)
-                        },
-                        width = 150.dp,
-                        height = 150.dp,
-                    )
-                    SchoolText(
-                        text = teacherList[index].name,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.headlineMedium,
-                        modifier = Modifier.padding(4.dp),
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun TeachersScreen(
     teacherList: List<RoomTeacher>,
     modifier: Modifier = Modifier,
     onNavIconClick: () -> Unit = {},
     onCardClick: (String) -> Unit = {},
+    onFabClick: () -> Unit = {}
 ) {
-    var isFabPressed by remember { mutableStateOf(false) }
-
     Scaffold(
         topBar = {
             SchoolTopBar(
@@ -143,21 +57,12 @@ fun TeachersScreen(
         },
         floatingActionButton = {
             SchoolFab(
-                onClick = {
-                    isFabPressed = !isFabPressed
-                }
+                onClick = onFabClick
             ) {
-                if (isFabPressed) {
-                    SchoolIcon(
-                        imageVector = Icons.Outlined.Save,
-                        modifier = Modifier.size(32.dp),
-                    )
-                } else {
-                    SchoolIcon(
-                        imageVector = Icons.Outlined.Add,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
+                SchoolIcon(
+                    imageVector = Icons.Outlined.Add,
+                    modifier = Modifier.size(32.dp),
+                )
             }
         }
     ) { innerPadding ->

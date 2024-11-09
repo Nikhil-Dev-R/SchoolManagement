@@ -1,5 +1,6 @@
 package com.rudraksha.school.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,16 +9,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BrowseGallery
 import androidx.compose.material.icons.outlined.NoiseControlOff
 import androidx.compose.material.icons.outlined.PersonOutline
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -26,36 +28,40 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rudraksha.school.models.firebase.FirebaseTeacher
+import com.rudraksha.school.models.firebase.Subject
 import com.rudraksha.school.ui.components.SchoolButton
-import com.rudraksha.school.ui.components.SchoolCard
-import com.rudraksha.school.ui.components.SchoolCheckBox
 import com.rudraksha.school.ui.components.SchoolIcon
 import com.rudraksha.school.ui.components.SchoolText
 import com.rudraksha.school.ui.components.SchoolTextField
 import com.rudraksha.school.ui.utils.SchoolTopBar
-import com.rudraksha.school.ui.utils.validateTeacherDetailsInput
-import com.rudraksha.school.viewmodel.SchoolViewModel
 
 @Composable
-fun AddTeacherScreen(
+fun AddStudentScreen(
     modifier: Modifier = Modifier,
     onNavIconClick: () -> Unit = {},
+    standardList: List<String> = listOf("1", "2", "3"),
+    subjectList: List<Subject> = listOf(
+        Subject("S1", "Sub1"),
+        Subject("S2", "Sub2"),
+        Subject("S3", "Sub3")
+    ),
     onSubmitClick: (String, String, String, String, Boolean, String) -> Unit = { _, _, _, _, _, _ -> },
 ) {
-//    val uiState by remember { mutableStateOf(UiStateAddTeacher()) }
-
     var id by remember { mutableStateOf("") }
+    var rollNo by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
-    var imageUrl by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var isClassTeacher by remember { mutableStateOf(false) }
     var standard by remember { mutableStateOf("") }
+    var section by remember { mutableStateOf("") }
+    var presentDays by remember { mutableIntStateOf(0) }
+    val sectionList = listOf("A", "B", "C", "D", "E", "F")
+    var expandedStandard by remember { mutableStateOf(false) }
+    var expandedSection by remember { mutableStateOf(false) }
+
 
     Scaffold(
         topBar = {
             SchoolTopBar(
-                title = "Add Teacher",
+                title = "Add Student",
                 onNavIconClick = onNavIconClick
             )
         }
@@ -66,28 +72,28 @@ fun AddTeacherScreen(
             verticalArrangement = Arrangement.Center,
             modifier = modifier
                 .padding(innerPadding)
+                .padding(16.dp)
                 .fillMaxSize()
         ) {
-            SchoolCard(
-                content = {
-                    SchoolIcon(
-                        imageVector = Icons.Outlined.BrowseGallery,
-                        modifier = Modifier.size(100.dp)
-                    )
-                    SchoolText(
-                        text = "Add Image",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                },
-                onCardClick = {
-                }
-            )
-
             SchoolTextField(
                 label = { SchoolText(text = "ID") },
                 value = id,
                 onValueChange = {
                     id = it
+                },
+                leadingIcon = {
+                    SchoolIcon(imageVector = Icons.Outlined.NoiseControlOff)
+                },
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Next
+                )
+            )
+
+            SchoolTextField(
+                label = { SchoolText(text = "Roll No.") },
+                value = rollNo,
+                onValueChange = {
+                    rollNo = it
                 },
                 leadingIcon = {
                     SchoolIcon(imageVector = Icons.Outlined.NoiseControlOff)
@@ -110,54 +116,33 @@ fun AddTeacherScreen(
                     imeAction = ImeAction.Next
                 )
             )
-
+            
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Start,
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
                     .fillMaxWidth()
+                    .clickable {
+                        expandedStandard = !expandedStandard
+                    }
             ) {
                 SchoolText(
-                    text = "Is class teacher?",
-                    style = MaterialTheme.typography.bodyLarge,
+                    text = "Standard",
+                    style = MaterialTheme.typography.bodyLarge
                 )
-                SchoolCheckBox(
-                    checkedState = isClassTeacher,
-                    onCheckedChange = {
-                        isClassTeacher = it
+
+                DropdownMenu(expanded = expandedStandard, onDismissRequest = { /*TODO*/ }) {
+                    standardList.forEach {
+                        DropdownMenuItem(
+                            text = {
+                                SchoolText(text = it)
+                            },
+                            onClick = {
+                                standard = it
+                            }
+                        )
                     }
-                )
+                }
             }
 
-            if (isClassTeacher) {
-                SchoolTextField(
-                    label = { SchoolText(text = "Grade Level") },
-                    value = standard,
-                    onValueChange = {
-                        standard = it
-                    },
-                    leadingIcon = {
-                        SchoolIcon(imageVector = Icons.Outlined.PersonOutline)
-                    },
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Next
-                    )
-                )
-            }
-
-            SchoolTextField(
-                label = { SchoolText(text = "Description") },
-                value = description,
-                onValueChange = {
-                    description = it
-                },
-                leadingIcon = {
-                    SchoolIcon(imageVector = Icons.Outlined.NoiseControlOff)
-                },
-                singleLine = false,
-                maxLines = 5
-            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -169,36 +154,15 @@ fun AddTeacherScreen(
                     )
                 },
                 onClick = {
-                    onSubmitClick( id, name, imageUrl, description, isClassTeacher, standard)
+//                    onSubmitClick( id, name, imageUrl, description, isClassTeacher, standard)
                 }
             )
         }
     }
 }
-/*sealed class UiState(
-    val id: String = "",
-    val name: String = "",
-    val imageUrl: String = "",
-    val isClassTeacher: Boolean = false,
-    val standard: String = "",
-    val description: String = "",
-    val isError: Boolean = false,
-    val errorMessage: String = ""
-)*/
-
-/*data class UiStateAddTeacher(
-    var id: MutableState<String> = StateFlow(""),
-    var name: MutableState<String> = mutableStateOf(""),
-    var imageUrl: MutableState<String> = mutableStateOf(""),
-    var isClassTeacher: Boolean = false,
-    var standard: MutableState<String> = mutableStateOf(""),
-    var description: MutableState<String> = mutableStateOf(""),
-    var isError: MutableState<Boolean> = mutableStateOf(false),
-    var errorMessage: MutableState<String> = mutableStateOf(""),
-)*/
 
 @Preview
 @Composable
-fun AddTeacherScreenPreview() {
-    AddTeacherScreen()
+fun StuPreview() {
+    AddStudentScreen()
 }

@@ -3,11 +3,16 @@ package com.rudraksha.school.navigation
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -18,10 +23,14 @@ import com.rudraksha.school.ui.screens.StudentProfileScreen
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.rudraksha.school.models.firebase.FirebaseStudent
+import com.rudraksha.school.models.firebase.FirebaseTeacher
 import com.rudraksha.school.models.standardList
 import com.rudraksha.school.models.room.RoomStudent
 import com.rudraksha.school.models.room.RoomTeacher
 import com.rudraksha.school.ui.screen.ResultManagementScreen
+import com.rudraksha.school.ui.screens.AddStudentScreen
+import com.rudraksha.school.ui.screens.AddTeacherScreen
 import com.rudraksha.school.ui.screens.AttendanceScreen
 import com.rudraksha.school.ui.screens.ClassDescScreen
 import com.rudraksha.school.ui.screens.ClassesScreen
@@ -30,10 +39,12 @@ import com.rudraksha.school.ui.screens.GalleryScreen
 import com.rudraksha.school.ui.screens.HomeScreen
 import com.rudraksha.school.ui.screens.RegisterScreen
 import com.rudraksha.school.ui.screens.SplashScreen
+import com.rudraksha.school.ui.screens.StudentsScreen
 import com.rudraksha.school.ui.screens.TeacherProfileScreen
 import com.rudraksha.school.ui.screens.TeachersScreen
 import com.rudraksha.school.ui.utils.validateLoginInput
 import com.rudraksha.school.ui.utils.validateRegistrationInput
+import com.rudraksha.school.ui.utils.validateTeacherDetailsInput
 
 @Composable
 fun AppNavHost(
@@ -58,18 +69,29 @@ fun AppNavHost(
             schoolViewModel.reset()
         }
     }
+//    if (schoolViewModel.isNetworkAvailable(context)) {
+//        schoolViewModel.saveStudent(
+//            FirebaseStudent(
+//
+//            )
+//        )
+//    }
 
-    // Handle UI States
-//    LaunchedEffect (uiState.isLoading) { // Show a loading spinner or overlay
-//        if (uiState.isLoading) {
-//            Column(
-//                horizontalAlignment = Alignment.CenterHorizontally,
-//                verticalArrangement = Arrangement.Center,
-//                modifier = Modifier.fillMaxSize()
-//            ) {
-//                CircularProgressIndicator(modifier = Modifier)
-//            }
-//        }
+//    @Composable
+//    fun showToast() {
+        if (uiState.isLoading) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                CircularProgressIndicator(modifier = Modifier)
+            }
+        }
+//    }
+
+//    LaunchedEffect(uiState.anyMessage) {
+//        showToast()
 //    }
 
     NavHost(
@@ -117,9 +139,11 @@ fun AppNavHost(
                                 popUpTo(Screen.Splash.route) { inclusive = true }
                             }
                             Log.d("Login", "Success")
+                            uiState.anyMessage = true
                             uiState.toastMessage = "Login Successful!"
                         } else {
                             Log.d("Login", "Failure ${uiState.toastMessage}")
+                            uiState.anyMessage = true
                             uiState.toastMessage = "Login Failed! ${uiState.toastMessage}"
                         }
                     }
@@ -196,19 +220,77 @@ fun AppNavHost(
             ClassDescScreen(
                 standard = standard,
                 classTeacher = classTeacher,
-                studentList = studentList,
+                isStudentListEmpty = studentList.isEmpty(),
                 subjectList = subjectList,
+                onNavIconClick = {
+                    navController.navigateUp()
+                },
+                onAttendanceClick = { std ->
+                    Log.d("Navigation", "Navigating to Attendance Screen with grade level: $std")
+                    navController.navigate("${Screen.Attendance.route}/$std")
+                },
+                onStudentsClick = { std ->
+                    navController.navigate("${Screen.Students.route}/${std}")
+                },
+                modifier = modifier
+            )
+        }
+
+        composable(
+            route = "${Screen.Students.route}/{standard}",
+            arguments = listOf(navArgument("standard") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            val standard = backStackEntry.arguments?.getString("standard") ?: ""
+
+            // Fetch students for the selected standard when navigating to Attendance screen
+            LaunchedEffect(standard) {
+                if(uiState.studentList[0].standard != standard) {
+                    schoolViewModel.fetchStudentsByStandard(standard)
+                }
+            }
+
+            val studentList = uiState.studentList.distinct().filter { it.standard == standard }.sortedBy { it.rollNumber }
+
+            StudentsScreen(
+                studentList = studentList,
                 onNavIconClick = {
                     navController.navigateUp()
                 },
                 onStudentClick = { id ->
                     navController.navigate("${Screen.StudentProfile.route}/${id}")
                 },
-                onAttendanceClick = { std ->
-                    Log.d("Navigation", "Navigating to Attendance Screen with grade level: $std")
-                    navController.navigate("${Screen.Attendance.route}/$std")
+                onFabClick = {
+                    navController.navigate(Screen.AddStudent.route)
                 },
                 modifier = modifier
+            )
+        }
+
+        composable(
+            route = Screen.AddStudent.route
+        ) {
+            AddStudentScreen(
+                onNavIconClick = { navController.navigateUp() },
+                modifier = modifier,
+//                onSubmitClick = { id, name, imageUrl, description, isClassTeacher, standard ->
+//                    validateTeacherDetailsInput(id, name, imageUrl, isClassTeacher, standard, description, uiState)
+//                    if(!uiState.anyMessage) {
+////
+////                    } else {
+//                        schoolViewModel.saveTeacher(
+//                            FirebaseTeacher(
+//                                id = id,
+//                                name = name,
+//                                imageUrl = imageUrl,
+//                                description = description,
+//                                isClassTeacher = isClassTeacher,
+//                                standard = standard
+//                            )
+//                        )
+//                        navController.navigateUp()
+//                        Toast.makeText(context, "Teacher added successfully!", Toast.LENGTH_SHORT).show()
+//                    }
+//                }
             )
         }
 
@@ -304,7 +386,38 @@ fun AppNavHost(
                 onCardClick = { id ->
                     navController.navigate("${Screen.TeacherProfile.route}/${id}")
                 },
+                onFabClick = {
+                    navController.navigate(Screen.AddTeacher.route)
+                },
                 modifier = modifier
+            )
+        }
+
+        composable(
+            route = Screen.AddTeacher.route
+        ) {
+            AddTeacherScreen(
+                onNavIconClick = { navController.navigateUp() },
+                modifier = modifier,
+                onSubmitClick = { id, name, imageUrl, description, isClassTeacher, standard ->
+                    validateTeacherDetailsInput(id, name, imageUrl, isClassTeacher, standard, description, uiState)
+                    if(!uiState.anyMessage) {
+//
+//                    } else {
+                        schoolViewModel.saveTeacher(
+                            FirebaseTeacher(
+                                id = id,
+                                name = name,
+                                imageUrl = imageUrl,
+                                description = description,
+                                isClassTeacher = isClassTeacher,
+                                standard = standard
+                            )
+                        )
+                        navController.navigateUp()
+                        Toast.makeText(context, "Teacher added successfully!", Toast.LENGTH_SHORT).show()
+                    }
+                }
             )
         }
 

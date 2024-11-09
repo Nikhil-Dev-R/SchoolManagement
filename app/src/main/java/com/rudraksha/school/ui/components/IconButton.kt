@@ -2,13 +2,9 @@ package com.rudraksha.school.ui.components
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ExitToApp
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +22,7 @@ import com.rudraksha.school.ui.theme.cutCornerShapeMedium
 import com.rudraksha.school.ui.theme.primaryContainerLight
 
 @Composable
-fun SchoolIconButton(
+fun SchoolButtonIconText(
     text: String,
     icon: ImageVector,
     onClick: () -> Unit,
@@ -75,7 +71,7 @@ fun SchoolIconButton(
 @Preview
 @Composable
 fun SchoolIconButtonPreview() {
-    SchoolIconButton(
+    SchoolButtonIconText(
         text = "Sign In",
         icon = Icons.AutoMirrored.Outlined.ExitToApp,
         onClick = { /* Handle button click */ },

@@ -1,7 +1,10 @@
 package com.rudraksha.school.viewmodel
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
@@ -49,12 +52,10 @@ class SchoolViewModel(
     private val localDataRepository = LocalDataRepository()
 
     fun getQuote(): String {
-        try {
-            val rand = Random.nextInt(localDataRepository.quotes.size)
-//            val rand = ThreadLocalRandom.current().nextInt(localDataRepository.quotes.size)
-            return localDataRepository.quotes[rand]
+        return try {
+            localDataRepository.quotes.random()
         } catch (e: IndexOutOfBoundsException) {
-            return "Education is the foundation of a country's prosperity."
+            "Education is the foundation of a country's prosperity."
         }
     }
 
@@ -65,7 +66,7 @@ class SchoolViewModel(
     fun loadInitialData() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                setLoading()
+                setLoading(isLoading = true)
                 localDataRepository.studentList.forEach { student ->
                     saveStudent(student)
                 }
@@ -75,7 +76,7 @@ class SchoolViewModel(
                 localDataRepository.galleryList.forEach { galleryItem ->
                     saveGallery(galleryItem)
                 }
-                reset()
+                setLoading(isLoading = false)
             }
         }
     }
@@ -83,50 +84,54 @@ class SchoolViewModel(
     fun fetchTeachers() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                setLoading()
+                setLoading(isLoading = true)
                 teacherDao.getAllTeachers().forEach { teacher ->
                     loadTeacher(teacher)
                     Log.d("Fetched", "Loaded Teacher ${teacher.name} ${teacher.id}")
                 }
-                reset()
+//                reset()
+                setLoading(isLoading = false)
             }
         }
     }
     fun fetchStudents() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                setLoading()
+                setLoading(isLoading = true)
                 studentDao.getAllStudents().forEach { student ->
                     loadStudent(student)
                     Log.d("Fetched", "Loaded Student ${student.name} ${student.standard}")
                 }
-                reset()
+                setLoading(isLoading = false)
+//                reset()
             }
         }
     }
     fun fetchStudentsByStandard(standard: String) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                setLoading()
+                setLoading(isLoading = true)
                 // Clear the previous list of students before adding new ones for the selected standard
                 _uiState.value = _uiState.value.copy(studentList = mutableListOf())
                 studentDao.getAllStudentsByStandard(standard).forEach { student ->
                     loadStudent(student)
                     Log.d("Fetched", "Loaded StudentStandard ${student.name} ${student.standard}")
                 }
-                reset()
+                setLoading(isLoading = false)
+//                reset()
             }
         }
     }
     fun fetchGalleryItems() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                setLoading()
+                setLoading(isLoading = true)
                 galleryDao.getAllGalleryItems().forEach { galleryItem ->
                     loadGalleryItem(galleryItem)
                     Log.d("Fetched", "Loaded Gallery ${galleryItem.name}")
                 }
-                reset()
+                setLoading(isLoading = false)
+//                reset()
             }
         }
     }
@@ -134,7 +139,7 @@ class SchoolViewModel(
     fun eraseAllData() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                setLoading()
+                setLoading(isLoading = true)
                 studentDao.deleteAllStudents()
                 teacherDao.deleteAllTeachers()
                 galleryDao.deleteAllGalleryItems()
@@ -150,15 +155,16 @@ class SchoolViewModel(
                     galleryList = mutableListOf()
                 )
 //                Log.d("Deletion", "Successful")
-                reset()
+                setLoading(isLoading = false)
+//                reset()
             }
         }
     }
 
     // Register a new student
-    private fun saveStudent(student: FirebaseStudent) {
+    fun saveStudent(student: FirebaseStudent) {
         viewModelScope.launch {
-            setLoading()
+            setLoading(isLoading = true)
             try {
                 firebaseRepo.saveStudent(student)
                 studentDao.insertStudent(student.toRoomStudent())
@@ -167,7 +173,8 @@ class SchoolViewModel(
                 setError("Error saving student: ${e.message}")
             } finally {
 //                Log.d("FLS", "Calling reset")
-                reset()
+                setLoading(isLoading = false)
+//                reset()
             }
         }
     }
@@ -181,10 +188,10 @@ class SchoolViewModel(
     }
 
     // Save teacher to Firebase and Room
-    private fun saveTeacher(teacher: FirebaseTeacher) {
+    fun saveTeacher(teacher: FirebaseTeacher) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                setLoading()
+                setLoading(isLoading = true)
                 try {
                     firebaseRepo.saveTeacher(teacher)
                     teacherDao.insertTeacher(teacher.toRoomTeacher())
@@ -194,7 +201,8 @@ class SchoolViewModel(
                     setError("Error saving teacher: ${e.message}")
                 } finally {
 //                    Log.d("FLS", "Calling reset")
-                    reset()
+                    setLoading(isLoading = false)
+//                    reset()
                 }
             }
         }
@@ -208,10 +216,10 @@ class SchoolViewModel(
     }
 
     // Save gallery item
-    private fun saveGallery(galleryItem: FirebaseGallery) {
+    fun saveGallery(galleryItem: FirebaseGallery) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                setLoading()
+                setLoading(isLoading = true)
                 try {
                     firebaseRepo.saveGalleryItem(galleryItem)
                     galleryDao.insertGalleryItem(galleryItem.toRoomGallery())
@@ -220,7 +228,8 @@ class SchoolViewModel(
                     setError("Error saving gallery item: ${e.message}")
                 } finally {
 //                    Log.d("FLS", "Calling reset")
-                    reset()
+                    setLoading(isLoading = false)
+//                    reset()
                 }
             }
         }
@@ -247,12 +256,13 @@ class SchoolViewModel(
     // Handle login, checking both Firebase and Room
     fun login(email: String, password: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
-            setLoading()
+            setLoading(isLoading = true)
             firebaseAuthRepo.login(email, password) { firebaseSuccess ->
                 if (firebaseSuccess) {
                     handleFirebaseLoginSuccess(password, onResult)
                 }
             }
+            setLoading(isLoading = false)
         }
     }
 
@@ -263,9 +273,7 @@ class SchoolViewModel(
                     firebaseAuthRepo.getCurrentUser()?.let { firebaseUser ->
                         val roomAppUser = firebaseUser.toRoomAppUser(password)
                         appUserDao.insertUser(roomAppUser)
-                        _uiState.value = _uiState.value.copy(
-                            isLoggedIn = true,
-                        )
+                        setLoading(isLoading = true)
                         loadLoggedInUser()
                         onResult(true)
                     } ?: onResult(false)
@@ -273,8 +281,8 @@ class SchoolViewModel(
                     e.message?.let { setError(it) }
                     onResult(false)
                 } finally {
+                    setLoading(isLoading = false)
 //                Log.d("FLS", "Calling reset in firebase login")
-                    reset()
                 }
             }
         }
@@ -283,16 +291,16 @@ class SchoolViewModel(
     // Handle registration
     fun register(email: String, password: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
-            setLoading()
+            setLoading(isLoading = true)
             firebaseAuthRepo.register(email, password) { firebaseSuccess ->
                 if (firebaseSuccess) {
                     handleFirebaseLoginSuccess(password, onResult)
                 } else {
                     setError("Registration failed.")
                     onResult(false)
-                    reset()
                 }
             }
+            setLoading(isLoading = false)
         }
     }
 
@@ -324,8 +332,8 @@ class SchoolViewModel(
         )
     }
 
-    private fun setLoading() {
-        _uiState.value = _uiState.value.copy(isLoading = true)
+    private fun setLoading(isLoading: Boolean) {
+        _uiState.value = _uiState.value.copy(isLoading = isLoading)
     }
 
     private fun setError(errorMsg: String) {
@@ -349,6 +357,14 @@ class SchoolViewModel(
         }
     }
 
+    // Helper function to check network availability
+    fun isNetworkAvailable(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+        return capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) ?: false
+    }
+
     companion object {
         @Volatile
         private var INSTANCE: SchoolViewModel? = null
@@ -367,11 +383,14 @@ class SchoolViewModel(
 
 data class SchoolUiState(
     val isLoading: Boolean = false,
-    val anyMessage: Boolean = false,
+    var anyMessage: Boolean = false,
     var toastMessage: String = "",
     val isLoggedIn: Boolean = false,
     val loggedInUser: RoomAppUser? = null,
     var studentList: MutableList<RoomStudent> = mutableListOf(),
     val teacherList: MutableList<RoomTeacher> = mutableListOf(),
     val galleryList: MutableList<RoomGallery> = mutableListOf(),
+    // For adding and editing
+    val currentFirebaseTeacher: FirebaseTeacher = FirebaseTeacher(),
+    val currentFirebaseStudent: FirebaseStudent = FirebaseStudent(),
 )

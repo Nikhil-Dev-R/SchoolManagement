@@ -2,6 +2,7 @@ package com.rudraksha.school.ui.utils
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,8 +17,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
+import androidx.compose.material.icons.automirrored.outlined.ContactSupport
 import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.Person3
+import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -56,21 +61,19 @@ fun DrawerContent(
             .width(300.dp)
             .fillMaxHeight()
             .background(color = MaterialTheme.colorScheme.background)
-            .padding(top = 8.dp, end = 8.dp, bottom = 8.dp, start = 8.dp)
-            .clickable { }
+            .padding(8.dp)
+            .clickable {}
             .verticalScroll(scrollState),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onCloseDrawer),
         ) {
-            IconButton(
-                onClick = onCloseDrawer
-            ) {
-                SchoolIcon(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                )
-            }
+            SchoolIcon(
+                imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
+            )
 
             SchoolText(
                 text = "Back",
@@ -117,11 +120,12 @@ fun DrawerContent(
 
         // Access Features
         DrawerItem(
-            text = "Students",
+            text = "Classes",
             onClick = {
                 onCloseDrawer()
                 navController.navigate(Screen.Classes.route)
             },
+            imageVector = Icons.Outlined.PersonOutline,
             modifier = Modifier
         )
 
@@ -133,6 +137,7 @@ fun DrawerContent(
                 onCloseDrawer()
                 navController.navigate(Screen.Teachers.route)
             },
+            imageVector = Icons.Outlined.Person3,
             modifier = Modifier
         )
 
@@ -144,6 +149,7 @@ fun DrawerContent(
                 onCloseDrawer()
                 navController.navigate(Screen.Gallery.route)
             },
+            imageVector = Icons.Outlined.Image,
             modifier = Modifier
         )
 
@@ -198,14 +204,17 @@ fun DrawerItem(
         content = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-//                horizontalArrangement = if(placeIconInRight) Arrangement.SpaceBetween else Arrangement.Start,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 if (!placeIconInRight) {
-                    SchoolIcon(
-                        imageVector = imageVector,
-                        modifier = modifier,
-                        contentDescription = ""
-                    )
+                    IconButton(onClick = onClick) {
+                        SchoolIcon(
+                            imageVector = imageVector,
+                            modifier = modifier,
+                            contentDescription = "",
+                        )
+                    }
                 }
 
                 SchoolText(
@@ -214,14 +223,17 @@ fun DrawerItem(
                     fontWeight = FontWeight.Bold,
                     modifier = modifier
                         .padding(4.dp)
+                        .clickable(onClick = onClick)
                 )
 
                 if (placeIconInRight) {
-                    SchoolIcon(
-                        imageVector = imageVector,
-                        modifier = modifier,
-                        contentDescription = ""
-                    )
+                    IconButton(onClick = onClick) {
+                        SchoolIcon(
+                            imageVector = imageVector,
+                            modifier = modifier,
+                            contentDescription = "",
+                        )
+                    }
                 }
             }
         }

@@ -13,6 +13,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+
 import com.rudraksha.school.models.room.RoomGallery
 import com.rudraksha.school.ui.components.SchoolCard
 import com.rudraksha.school.ui.components.SchoolImage
@@ -45,8 +46,9 @@ fun GalleryDescScreen(
                     .aspectRatio(16 / 9f)
                     .align(Alignment.CenterHorizontally)
                     .shadow(
-                        elevation = 4.dp,
-                        shape = circleShapeMedium
+                        elevation = 8.dp,
+                        shape = circleShapeMedium,
+                        spotColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ),
                 content = {
                     SchoolImage(
